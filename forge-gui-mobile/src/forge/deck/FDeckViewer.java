@@ -1,9 +1,11 @@
 package forge.deck;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
+
 import forge.Forge;
+import forge.adventure.player.AdventurePlayer;
 import forge.assets.FImage;
 import forge.assets.FSkinImage;
 import forge.assets.ImageCache;
@@ -75,14 +77,39 @@ public class FDeckViewer extends FScreen {
     public static void copyCollectionToClipboard(CardPool pool) {
         final String nl = System.lineSeparator();
         final StringBuilder collectionList = new StringBuilder();
-        Set<String> accounted = new HashSet<>();
+        Map<String, String> accountedMap = new HashMap<>();
+        collectionList.append("\"Count\",\"Name\",\"Edition\"").append(nl);
+        Pattern regexQuote = Pattern.compile("\"");
+        Pattern regexA = Pattern.compile("[\u00E0\u00E1\u00E2\u00E3\u00E4\u00E5]");
+        Pattern regexE = Pattern.compile("[\u00E8\u00E9\u00EA\u00EB]");
+        Pattern regexI = Pattern.compile("[\u00EC\u00ED\u00EE\u00EF]");
+        Pattern regexO = Pattern.compile("[\u00F2\u00F3\u00F4\u00F5\u00F6]");
+        Pattern regexU = Pattern.compile("[\u00F9\u00FA\u00FB\u00FC]");
+        CardPool pool = AdventurePlayer.current().getCards();
+
         for (final Entry<PaperCard, Integer> entry : pool) {
-            String cardName = entry.getKey().getCardName();
-            if (!accounted.contains(cardName)) {
-                collectionList.append(pool.countByName(cardName)).append(" ").append(cardName).append(nl);
-                accounted.add(cardName);
+            PaperCard card = entry.getKey();
+            String cardName = card.getCardName();
+            String cardEdition = card.getEdition();
+            String accountedKey = cardName + '\t' + cardEdition;
+            if (!accountedMap.containsKey(accountedKey) && !card.isVeryBasicLand()) {
+                String regexCardName = regexQuote.matcher(cardName).replaceAll("\"\"");
+                regexCardName = regexA.matcher(regexCardName).replaceAll("a");
+                regexCardName = regexE.matcher(regexCardName).replaceAll("e");
+                regexCardName = regexI.matcher(regexCardName).replaceAll("i");
+                regexCardName = regexO.matcher(regexCardName).replaceAll("o");
+                regexCardName = regexU.matcher(regexCardName).replaceAll("u");
+                String cardLine = "\"" + pool.countByNameAndEdition(card) + "\",\"" + regexCardName + "\",\"" + cardEdition + "\"" + nl;
+                accountedMap.put(accountedKey, cardLine);
             }
         }
+
+        List<String> sortedKeys = new ArrayList<>(accountedMap.keySet());
+        Collections.sort(sortedKeys);
+        for (String key : sortedKeys) {
+            collectionList.append(accountedMap.get(key));
+        }
+
         Forge.getClipboard().setContents(collectionList.toString());
         FOptionPane.showMessageDialog(Forge.getLocalizer().getMessage("lblCollectionCopiedClipboard"));
     }
