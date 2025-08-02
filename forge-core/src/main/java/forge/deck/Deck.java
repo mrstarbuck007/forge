@@ -182,6 +182,39 @@ public class Deck extends DeckBase implements Iterable<Entry<DeckSection, CardPo
         return null;
     }
 
+    public void replaceCardNameWithOldest(String name, List<Entry<PaperCard, Integer>> cardEntries) {
+        cardEntries.sort(Entry.comparingByKey());
+
+        int i = 0;
+        int leftover = 0;
+        for (Entry<DeckSection, CardPool> kv : parts.entrySet()) {
+            CardPool pool = kv.getValue();
+            List<Entry<PaperCard, Integer>> cardEntriesToReplace = new ArrayList<>();
+            for (Entry<PaperCard, Integer> pc : pool) {
+                if (pc.getKey().getName().equalsIgnoreCase(name)) {
+                    cardEntriesToReplace.add(pc);
+                }
+            }
+            int totalNumToAdd = 0;
+            for (Entry<PaperCard, Integer> pc : cardEntriesToReplace) {
+                totalNumToAdd += pc.getValue();
+                pool.remove(pc.getKey(), pc.getValue());
+            }
+
+            while (totalNumToAdd > 0) {
+                Entry<PaperCard, Integer> pc = cardEntries.get(i);
+                int pcValue = leftover > 0 ? leftover : pc.getValue();
+                int numToAdd = Math.min(totalNumToAdd, pcValue);
+                pool.add(pc.getKey(), numToAdd);
+                leftover = pcValue - numToAdd;
+                if (leftover == 0) {
+                    i++;
+                }
+                totalNumToAdd -= numToAdd;
+            }
+        }
+    }
+
     // will return new if it was absent
     public CardPool getOrCreate(DeckSection deckSection) {
         CardPool p = get(deckSection);

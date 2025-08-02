@@ -114,6 +114,40 @@ public class FDeckViewer extends FScreen {
         FOptionPane.showMessageDialog(Forge.getLocalizer().getMessage("lblCollectionCopiedClipboard"));
     }
 
+    public static void addExtrasToAutoSell() {
+        // get the player's collection minus the auto sell cards
+        CardPool nonAutoSellCards = AdventurePlayer.current().getCollectionCards(false);
+
+        Map<String, List<Entry<PaperCard, Integer>>> cardEntriesByName = new HashMap<>();
+
+        for (Entry<PaperCard, Integer> cardEntry : nonAutoSellCards) {
+            PaperCard card = cardEntry.getKey();
+            if (card.isVeryBasicLand()) {
+                continue;
+            }
+
+            String cardName = card.getCardName().toLowerCase();
+            if (!cardEntriesByName.containsKey(cardName)) {
+                cardEntriesByName.put(cardName, new ArrayList<>());
+            }
+            List<Entry<PaperCard, Integer>> cardEntries = cardEntriesByName.get(cardName);
+            cardEntries.add(cardEntry);
+        }
+
+        int totalCardsAdded = 0;
+        for (List<Entry<PaperCard, Integer>> cardEntries : cardEntriesByName.values()) {
+            int totalCards = 0;
+            for (Entry<PaperCard, Integer> cardEntry : cardEntries) {
+                totalCards += cardEntry.getValue();
+            }
+            if (totalCards > 4) {
+                totalCardsAdded += AdventurePlayer.current().addExtraCardEntriesToAutoSell(cardEntries, totalCards - 4);
+            }
+        }
+
+        FOptionPane.showMessageDialog(Forge.getLocalizer().getMessage("lblExtrasAddedToAutoSell", totalCardsAdded));
+    }
+
     private final Deck deck;
     private final CardManager cardManager;
     private DeckSection currentSection;

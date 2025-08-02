@@ -1310,6 +1310,34 @@ public class AdventurePlayer implements Serializable, SaveFileContent {
         return collectionCards;
     }
 
+    public int addExtraCardEntriesToAutoSell(List<Map.Entry<PaperCard, Integer>> cardEntries, int extraCards) {
+        cardEntries.sort(Map.Entry.<PaperCard, Integer>comparingByKey().reversed());
+
+        int totalCardsAdded = 0;
+        // cards are already sorted by card edition (newest to oldest)
+        for (Map.Entry<PaperCard, Integer> cardEntry : cardEntries) {
+            PaperCard card = cardEntry.getKey();
+            if (card.isFoil() || card.hasNoSellValue()) {
+                continue;
+            }
+            int cardsToAdd = Math.min(extraCards, cardEntry.getValue());
+            autoSellCards.add(card, cardsToAdd);
+            totalCardsAdded += cardsToAdd;
+            extraCards -= cardsToAdd;
+            if (extraCards <= 0) {
+                break;
+            }
+        }
+
+        for (int i = 0; i < decks.size(); i++) {
+            if (decks.get(i) != null) {
+                decks.get(i).replaceCardNameWithOldest(cardEntries.get(0).getKey().getName(), cardEntries);
+            }
+        }
+
+        return totalCardsAdded;
+    }
+
     public void loadChanges(PointOfInterestChanges changes) {
         this.currentLocationChanges = changes;
     }
