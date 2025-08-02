@@ -220,6 +220,7 @@
                             <goal>git-changelog</goal>
                         </goals>
                         <configuration>
+                            <skip>true</skip>
                             <!-- TODO: insert placeholder for latest version tag -->
                             <fromRef>forge-1.6.65</fromRef>
                             <file>../forge-gui/release-files/CHANGES.txt</file>

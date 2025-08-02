@@ -113,6 +113,7 @@ public final class ItemListView<T extends InventoryItem> extends ItemView<T> {
     protected void onSetSelectedIndex(int index) {
         selectedIndices.clear();
         selectedIndices.add(index);
+        onSelectionChange();
     }
 
     @Override
@@ -121,6 +122,7 @@ public final class ItemListView<T extends InventoryItem> extends ItemView<T> {
         for (Integer index : indices) {
             selectedIndices.add(index);
         }
+        onSelectionChange();
     }
 
     @Override
