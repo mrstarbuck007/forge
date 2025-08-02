@@ -48,11 +48,6 @@ public class EffectAi extends SpellAbilityAi {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
                 randomReturn = true;
-            } else if (logic.equals("EndOfOppTurn")) {
-                if (!phase.getPlayerTurn().isOpponentOf(ai) || phase.getPhase().isBefore(PhaseType.END_OF_TURN)) {
-                    return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
-                }
-                randomReturn = true;
             } else if (logic.equals("KeepOppCreatsLandsTapped")) {
                 for (Player opp : ai.getOpponents()) {
                     boolean worthHolding = false;
@@ -109,7 +104,7 @@ public class EffectAi extends SpellAbilityAi {
                 }
             } else if (logic.equals("Fog")) {
                 FogAi fogAi = new FogAi();
-                if (!fogAi.canPlayAI(ai, sa).willingToPlay()) {
+                if (!fogAi.canPlay(ai, sa).willingToPlay()) {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
 
@@ -290,10 +285,11 @@ public class EffectAi extends SpellAbilityAi {
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             } else if (logic.equals("Burn")) {
                 SpellAbility burn = sa.getSubAbility();
-                return SpellApiToAi.Converter.get(burn).canPlayAIWithSubs(ai, burn).willingToPlay() ? new AiAbilityDecision(100, AiPlayDecision.WillPlay) : new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                return SpellApiToAi.Converter.get(burn).canPlayWithSubs(ai, burn).willingToPlay() ? new AiAbilityDecision(100, AiPlayDecision.WillPlay) : new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             } else if (logic.equals("YawgmothsWill")) {
                 return SpecialCardAi.YawgmothsWill.consider(ai, sa) ? new AiAbilityDecision(100, AiPlayDecision.WillPlay) : new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             } else if (logic.startsWith("NeedCreatures")) {
+                // TODO convert to AiCheckSVar
                 if (ai.getCreaturesInPlay().isEmpty()) {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
@@ -328,8 +324,8 @@ public class EffectAi extends SpellAbilityAi {
                 Combat combat = game.getCombat();
                 if (combat != null && combat.isAttacking(host, ai) && !combat.isBlocked(host)
                         && phase.is(PhaseType.COMBAT_DECLARE_BLOCKERS)
-                        && !AiCardMemory.isRememberedCard(ai, host, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN)) {
-                    AiCardMemory.rememberCard(ai, host, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN); // ideally needs once per combat or something
+                        && !host.getAbilityActivatedThisTurn().getActivators(sa).contains(ai)) {
+                    // ideally needs once per combat or something
                     return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
                 }
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
@@ -419,9 +415,9 @@ public class EffectAi extends SpellAbilityAi {
     }
 
     @Override
-    protected AiAbilityDecision doTriggerAINoCost(final Player aiPlayer, final SpellAbility sa, final boolean mandatory) {
+    protected AiAbilityDecision doTriggerNoCost(final Player aiPlayer, final SpellAbility sa, final boolean mandatory) {
         if (sa.hasParam("AILogic")) {
-            if (canPlayAI(aiPlayer, sa).willingToPlay()) {
+            if (canPlay(aiPlayer, sa).willingToPlay()) {
                 return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
             }
         }
@@ -451,7 +447,7 @@ public class EffectAi extends SpellAbilityAi {
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 
-        return super.doTriggerAINoCost(aiPlayer, sa, mandatory);
+        return super.doTriggerNoCost(aiPlayer, sa, mandatory);
     }
 
     protected boolean cantRegenerateCheckCombat(Card host) {

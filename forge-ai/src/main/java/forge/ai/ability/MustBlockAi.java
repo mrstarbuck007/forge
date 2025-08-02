@@ -19,7 +19,7 @@ import java.util.Map;
 public class MustBlockAi extends SpellAbilityAi {
 
     @Override
-    protected AiAbilityDecision canPlayAI(Player aiPlayer, SpellAbility sa) {
+    protected AiAbilityDecision canPlay(Player aiPlayer, SpellAbility sa) {
         final Card source = sa.getHostCard();
         final Game game = aiPlayer.getGame();
         final Combat combat = game.getCombat();
@@ -27,7 +27,8 @@ public class MustBlockAi extends SpellAbilityAi {
 
         if (combat == null || !combat.isAttacking(source)) {
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
-        } else if (AiCardMemory.isRememberedCard(aiPlayer, source, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN)) {
+        }
+        if (source.getAbilityActivatedThisTurn().getActivators(sa).contains(aiPlayer)) {
             // The AI can meaningfully do it only to one creature per card yet, trying to do it to multiple cards
             // may result in overextending and losing the attacker
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
@@ -41,7 +42,6 @@ public class MustBlockAi extends SpellAbilityAi {
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
             sa.getTargets().add(blocker);
-            AiCardMemory.rememberCard(aiPlayer, source, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN);
             return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
         }
 
@@ -49,18 +49,18 @@ public class MustBlockAi extends SpellAbilityAi {
     }
 
     @Override
-    public AiAbilityDecision chkAIDrawback(SpellAbility sa, Player aiPlayer) {
+    public AiAbilityDecision chkDrawback(SpellAbility sa, Player aiPlayer) {
         if (sa.hasParam("DefinedAttacker")) {
             // The AI can't handle "target creature blocks another target creature" abilities yet
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 
         // Otherwise it's a standard targeted "target creature blocks CARDNAME" ability, so use the main canPlayAI code path
-        return canPlayAI(aiPlayer, sa);
+        return canPlay(aiPlayer, sa);
     }
 
     @Override
-    protected AiAbilityDecision doTriggerAINoCost(final Player ai, SpellAbility sa, boolean mandatory) {
+    protected AiAbilityDecision doTriggerNoCost(final Player ai, SpellAbility sa, boolean mandatory) {
         final Card source = sa.getHostCard();
 
         // only use on creatures that can attack

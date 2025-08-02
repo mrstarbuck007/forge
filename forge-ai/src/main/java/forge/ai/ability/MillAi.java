@@ -29,9 +29,8 @@ public class MillAi extends SpellAbilityAi {
         if (aiLogic.equals("Main1")) {
             return !ph.getPhase().isBefore(PhaseType.MAIN2) || sa.hasParam("ActivationPhases")
                     || ComputerUtil.castSpellInMain1(ai, sa);
-        } else if (aiLogic.equals("EndOfOppTurn")) {
-            return ph.is(PhaseType.END_OF_TURN) && ph.getNextTurn().equals(ai);
         } else if (aiLogic.equals("LilianaMill")) {
+            // TODO convert to AICheckSVar
             // Only mill if a "Raise Dead" target is available, in case of control decks with few creatures
             return CardLists.filter(ai.getCardsIn(ZoneType.Graveyard), CardPredicates.CREATURES).size() >= 1;
         }
@@ -162,12 +161,12 @@ public class MillAi extends SpellAbilityAi {
     }
 
     @Override
-    public AiAbilityDecision chkAIDrawback(SpellAbility sa, Player aiPlayer) {
+    public AiAbilityDecision chkDrawback(SpellAbility sa, Player aiPlayer) {
         return targetAI(aiPlayer, sa, true) ? new AiAbilityDecision(100, AiPlayDecision.WillPlay) : new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
     }
 
     @Override
-    protected AiAbilityDecision doTriggerAINoCost(Player aiPlayer, SpellAbility sa, boolean mandatory) {
+    protected AiAbilityDecision doTriggerNoCost(Player aiPlayer, SpellAbility sa, boolean mandatory) {
         if (!targetAI(aiPlayer, sa, mandatory)) {
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }

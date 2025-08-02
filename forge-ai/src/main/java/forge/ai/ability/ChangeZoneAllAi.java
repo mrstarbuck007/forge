@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ChangeZoneAllAi extends SpellAbilityAi {
     @Override
-    protected AiAbilityDecision canPlayAI(Player ai, SpellAbility sa) {
+    protected AiAbilityDecision canPlay(Player ai, SpellAbility sa) {
         // Change Zone All, can be any type moving from one zone to another
         final Cost abCost = sa.getPayCosts();
         final Card source = sa.getHostCard();
@@ -249,7 +249,7 @@ public class ChangeZoneAllAi extends SpellAbilityAi {
      * @return a boolean.
      */
     @Override
-    public AiAbilityDecision chkAIDrawback(SpellAbility sa, Player aiPlayer) {
+    public AiAbilityDecision chkDrawback(SpellAbility sa, Player aiPlayer) {
         // if putting cards from hand to library and parent is drawing cards
         // make sure this will actually do something:
 
@@ -285,9 +285,7 @@ public class ChangeZoneAllAi extends SpellAbilityAi {
     }
 
     @Override
-    protected AiAbilityDecision doTriggerAINoCost(Player ai, final SpellAbility sa, boolean mandatory) {
-        // Change Zone All, can be any type moving from one zone to another
-
+    protected AiAbilityDecision doTriggerNoCost(Player ai, final SpellAbility sa, boolean mandatory) {
         final ZoneType destination = ZoneType.smartValueOf(sa.getParam("Destination"));
         final ZoneType origin = ZoneType.listValueOf(sa.getParam("Origin")).get(0);
 

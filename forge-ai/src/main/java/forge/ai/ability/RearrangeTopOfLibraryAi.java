@@ -22,7 +22,7 @@ public class RearrangeTopOfLibraryAi extends SpellAbilityAi {
      * @see forge.card.abilityfactory.SpellAiLogic#canPlayAI(forge.game.player.Player, java.util.Map, forge.card.spellability.SpellAbility)
      */
     @Override
-    protected AiAbilityDecision canPlayAI(Player aiPlayer, SpellAbility sa) {
+    protected AiAbilityDecision canPlay(Player aiPlayer, SpellAbility sa) {
         // Specific details of ordering cards are handled by PlayerControllerAi#orderMoveToZoneList
         final PhaseHandler ph = aiPlayer.getGame().getPhaseHandler();
         final Card source = sa.getHostCard();
@@ -37,13 +37,12 @@ public class RearrangeTopOfLibraryAi extends SpellAbilityAi {
             }
 
             // Do it once per turn, generally (may be improved later)
-            if (AiCardMemory.isRememberedCardByName(aiPlayer, source.getName(), AiCardMemory.MemorySet.ACTIVATED_THIS_TURN)) {
+            if (source.getAbilityActivatedThisTurn().getActivators(sa).contains(aiPlayer)) {
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             }
         }
 
         if (sa.usesTargeting()) {
-            // ability is targeted
             sa.resetTargets();
 
             PlayerCollection targetableOpps = aiPlayer.getOpponents().filter(PlayerPredicates.isTargetableBy(sa));
@@ -62,14 +61,6 @@ public class RearrangeTopOfLibraryAi extends SpellAbilityAi {
             } else {
                 return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi); // could not find a valid target
             }
-
-            if (!canTgtHuman || !canTgtAI) {
-                // can't target another player anyway, remember for no second activation this turn
-                AiCardMemory.rememberCard(aiPlayer, source, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN);
-            }
-        } else {
-            // if it's just defined, no big deal
-            AiCardMemory.rememberCard(aiPlayer, source, AiCardMemory.MemorySet.ACTIVATED_THIS_TURN);
         }
 
         return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
@@ -79,10 +70,8 @@ public class RearrangeTopOfLibraryAi extends SpellAbilityAi {
      * @see forge.card.abilityfactory.SpellAiLogic#doTriggerAINoCost(forge.game.player.Player, java.util.Map, forge.card.spellability.SpellAbility, boolean)
      */
     @Override
-    protected AiAbilityDecision doTriggerAINoCost(Player ai, SpellAbility sa, boolean mandatory) {
-        // Specific details of ordering cards are handled by PlayerControllerAi#orderMoveToZoneList
-
-        AiAbilityDecision decision = canPlayAI(ai, sa);
+    protected AiAbilityDecision doTriggerNoCost(Player ai, SpellAbility sa, boolean mandatory) {
+        AiAbilityDecision decision = canPlay(ai, sa);
         if (decision.willingToPlay()) {
             return decision;
         }
