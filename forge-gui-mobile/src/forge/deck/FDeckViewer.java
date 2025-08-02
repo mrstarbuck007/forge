@@ -85,7 +85,6 @@ public class FDeckViewer extends FScreen {
         Pattern regexI = Pattern.compile("[\u00EC\u00ED\u00EE\u00EF]");
         Pattern regexO = Pattern.compile("[\u00F2\u00F3\u00F4\u00F5\u00F6]");
         Pattern regexU = Pattern.compile("[\u00F9\u00FA\u00FB\u00FC]");
-        CardPool pool = AdventurePlayer.current().getCards();
 
         for (final Entry<PaperCard, Integer> entry : pool) {
             PaperCard card = entry.getKey();
