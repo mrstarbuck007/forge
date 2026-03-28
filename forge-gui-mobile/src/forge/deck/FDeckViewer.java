@@ -62,7 +62,7 @@ public class FDeckViewer extends FScreen {
         Pattern regexU = Pattern.compile("[\u00F9\u00FA\u00FB\u00FC]");
         Pattern regexEdPlst = Pattern.compile("PLIST|MB1");
         Pattern regexEdNem = Pattern.compile("NMS");
-        Pattern regexEdMe2 = Pattern.compile("PO2");
+        Pattern regexEdP02 = Pattern.compile("PO2");
 
         for (final Entry<PaperCard, Integer> entry : pool) {
             PaperCard card = entry.getKey();
@@ -78,7 +78,7 @@ public class FDeckViewer extends FScreen {
                 regexCardName = regexU.matcher(regexCardName).replaceAll("u");
                 String regexCardEdition = regexEdPlst.matcher(cardEdition).replaceAll("PLST");
                 regexCardEdition = regexEdNem.matcher(regexCardEdition).replaceAll("NEM");
-                regexCardEdition = regexEdMe2.matcher(regexCardEdition).replaceAll("ME2");
+                regexCardEdition = regexEdP02.matcher(regexCardEdition).replaceAll("P02");
                 String cardLine = "\"" + pool.countByNameAndEdition(card) + "\",\"" + regexCardName + "\",\"" + regexCardEdition + "\"" + nl;
                 accountedMap.put(accountedKey, cardLine);
             }
