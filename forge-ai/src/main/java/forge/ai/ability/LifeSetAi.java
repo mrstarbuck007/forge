@@ -54,6 +54,26 @@ public class LifeSetAi extends SpellAbilityAi {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
                 sa.getTargets().add(opponent);
+            } else if (amount == 0 && sa.getSVar(amountStr).contains("TargetedPlayer$")) {
+                // Amount depends on the chosen target (e.g. TargetedPlayer$LifeTotal/Twice).
+                // Evaluate with each candidate before deciding.
+                sa.getTargets().add(ai);
+                int selfAmount = AbilityUtils.calculateAmount(sa.getHostCard(), amountStr, sa);
+                sa.resetTargets();
+                if (selfAmount > myLife && ai.canGainLife()) {
+                    sa.getTargets().add(ai);
+                } else if (opponent != null) {
+                    sa.getTargets().add(opponent);
+                    int oppAmount = AbilityUtils.calculateAmount(sa.getHostCard(), amountStr, sa);
+                    sa.resetTargets();
+                    if (oppAmount < hlife && opponent.canLoseLife()) {
+                        sa.getTargets().add(opponent);
+                    } else {
+                        return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                    }
+                } else {
+                    return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                }
             } else {
                 if (amount > myLife && myLife <= 10 && ai.canGainLife()) {
                     sa.getTargets().add(ai);
@@ -133,6 +153,30 @@ public class LifeSetAi extends SpellAbilityAi {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
                 sa.getTargets().add(opponent);
+            } else if (amount == 0 && sa.getSVar(amountStr).contains("TargetedPlayer$")) {
+                // Amount depends on the chosen target (e.g. TargetedPlayer$LifeTotal/Twice).
+                // Evaluate with each candidate before deciding.
+                sa.getTargets().add(ai);
+                int selfAmount = AbilityUtils.calculateAmount(source, amountStr, sa);
+                sa.resetTargets();
+                if (selfAmount > myLife && ai.canGainLife()) {
+                    sa.getTargets().add(ai);
+                } else if (opponent != null) {
+                    sa.getTargets().add(opponent);
+                    int oppAmount = AbilityUtils.calculateAmount(source, amountStr, sa);
+                    sa.resetTargets();
+                    if (oppAmount < hlife && opponent.canLoseLife()) {
+                        sa.getTargets().add(opponent);
+                    } else if (mandatory) {
+                        sa.getTargets().add(ai);
+                    } else {
+                        return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                    }
+                } else if (mandatory) {
+                    sa.getTargets().add(ai);
+                } else {
+                    return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                }
             } else {
                 if (amount > myLife && myLife <= 10) {
                     sa.getTargets().add(ai);
