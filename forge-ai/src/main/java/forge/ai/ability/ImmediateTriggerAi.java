@@ -2,12 +2,31 @@ package forge.ai.ability;
 
 import forge.ai.*;
 import forge.game.card.Card;
+import forge.game.cost.Cost;
 import forge.game.player.Player;
 import forge.game.spellability.AbilitySub;
 import forge.game.spellability.SpellAbility;
+import forge.util.collect.FCollectionView;
 
 public class ImmediateTriggerAi extends SpellAbilityAi {
     // TODO: this class is largely reused from DelayedTriggerAi, consider updating
+
+    @Override
+    public boolean willPayUnlessCost(Player payer, SpellAbility sa, Cost cost, boolean alreadyPaid, FCollectionView<Player> payers) {
+        // When UnlessSwitched=true, paying activates the effect (our own ability).
+        // Don't pay if the execute SA has no beneficial targets.
+        if (sa.hasParam("UnlessSwitched") && sa.getActivatingPlayer().equals(payer)) {
+            SpellAbility trigsa = sa.getAdditionalAbility("Execute");
+            if (trigsa != null) {
+                AiController aic = ((PlayerControllerAi) payer.getController()).getAi();
+                trigsa.setActivatingPlayer(payer);
+                if (!aic.doTrigger(trigsa, false)) {
+                    return false;
+                }
+            }
+        }
+        return super.willPayUnlessCost(payer, sa, cost, alreadyPaid, payers);
+    }
 
     @Override
     public AiAbilityDecision chkDrawback(Player ai, SpellAbility sa) {

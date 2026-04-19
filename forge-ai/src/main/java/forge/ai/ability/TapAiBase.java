@@ -106,8 +106,9 @@ public abstract class TapAiBase extends SpellAbilityAi {
         tapList = CardLists.filter(tapList, CREATURE_OR_TAP_ABILITY);
 
         //use broader approach when the cost is a positive thing
-        if (tapList.isEmpty() && ComputerUtil.activateForCost(sa, ai)) { 
+        if (tapList.isEmpty() && ComputerUtil.activateForCost(sa, ai)) {
             tapList = CardLists.getTargetableCards(ai.getOpponents().getCardsIn(ZoneType.Battlefield), sa);
+            tapList = CardLists.filter(tapList, CardPredicates.CAN_TAP);
             tapList = CardLists.filter(tapList, CREATURE_OR_TAP_ABILITY);
         }
 
@@ -236,11 +237,13 @@ public abstract class TapAiBase extends SpellAbilityAi {
             return true;
         }
 
-        // try to just tap already tapped things
-        tapList = CardLists.filter(list, CardPredicates.TAPPED);
-
-        if (tapTargetList(ai, sa, tapList, mandatory)) {
-            return true;
+        // only tap already-tapped things if SA has a sub-ability that benefits from the target
+        // (for pure tap effects, targeting a tapped creature wastes the effect)
+        if (sa.getSubAbility() != null) {
+            tapList = CardLists.filter(list, CardPredicates.TAPPED);
+            if (tapTargetList(ai, sa, tapList, mandatory)) {
+                return true;
+            }
         }
         
         if (sa.isMinTargetChosen()) {
