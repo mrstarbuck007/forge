@@ -117,6 +117,11 @@ public class CopySpellAbilityAi extends SpellAbilityAi {
             return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
         }
 
+        // Copying the spell that triggered this ability (e.g. Tawnos, the Toymaker) is free and almost always beneficial.
+        if ("TriggeredSpellAbility".equals(sa.getParamOrDefault("Defined", ""))) {
+            return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
+        }
+
         return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
     }
 
