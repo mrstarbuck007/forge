@@ -43,9 +43,9 @@ public class ActivationTable extends ForwardingTable<SpellAbility, Optional<Stat
             List<Player> activators = get(original, st);
             if (activators == null) {
                 activators = Lists.newArrayList();
+                delegate().put(original, st, activators);
             }
             activators.add(sa.getActivatingPlayer());
-            delegate().put(original, st, activators);
         }
     }
 
