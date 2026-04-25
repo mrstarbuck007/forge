@@ -313,6 +313,11 @@ public class PumpAi extends PumpAiBase {
                     return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
                 }
                 if (!card.getController().isOpponentOf(ai)) {
+                    // Don't re-grant keywords the card already has when there is no +P/+T benefit
+                    if (sa.isActivatedAbility() && defense == 0 && attack == 0 && !keywords.isEmpty()
+                            && keywords.stream().allMatch(card::hasKeyword)) {
+                        continue;
+                    }
                     if (ComputerUtilCard.shouldPumpCard(ai, sa, card, defense, attack, keywords, false)) {
                         return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
                     }
@@ -322,7 +327,11 @@ public class PumpAi extends PumpAiBase {
                                 game.getPhaseHandler().is(PhaseType.COMBAT_BEGIN, ai)) {
                             Card pumped = ComputerUtilCard.getPumpedCreature(ai, sa, card, 0, 0, keywords);
                             if (ComputerUtilCard.doesSpecifiedCreatureAttackAI(ai, pumped)) {
-                                // If the AI can attack with the pumped creature, then it is worth playing
+                                // Commit to attacking since we're spending mana to enable it
+                                if (game.getPhaseHandler().is(PhaseType.COMBAT_BEGIN, ai)
+                                        && sa.isActivatedAbility() && ai.getController().isAI()) {
+                                    AiCardMemory.rememberCard(ai, card, AiCardMemory.MemorySet.MANDATORY_ATTACKERS);
+                                }
                                 return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
                             }
                             return new AiAbilityDecision(0, AiPlayDecision.DoesntImpactCombat);
