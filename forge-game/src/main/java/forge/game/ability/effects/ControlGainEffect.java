@@ -93,6 +93,7 @@ public class ControlGainEffect extends SpellAbilityEffect {
         final Game game = host.getGame();
         if (c.isInPlay()) {
             c.removeTempController(tStamp);
+            c.removeChangedSVars(tStamp, 0);
 
             game.getAction().controllerChangeZoneCorrection(c);
         }
@@ -194,7 +195,10 @@ public class ControlGainEffect extends SpellAbilityEffect {
                 }
                 if (lose.contains("EOT")) {
                     game.getEndOfTurn().addUntil(loseControl);
-                    tgtC.addChangedSVars(Collections.singletonMap("SacMe", "6"), tStamp, 0);
+                    Map<String, String> eotSVars = Maps.newHashMap();
+                    eotSVars.put("SacMe", "6");
+                    eotSVars.put("EndOfTurnLeavePlay", "EOT");
+                    tgtC.addChangedSVars(eotSVars, tStamp, 0);
                 }
                 if (lose.contains("EndOfCombat")) {
                     game.getEndOfCombat().addUntil(loseControl);
