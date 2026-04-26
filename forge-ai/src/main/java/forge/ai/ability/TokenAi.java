@@ -144,6 +144,11 @@ public class TokenAi extends SpellAbilityAi {
             return new AiAbilityDecision(0, AiPlayDecision.WouldDestroyLegend);
         }
 
+        // Don't tap creatures that may be able to block (e.g. Gilded Goose tapping for a Food token)
+        if (ComputerUtil.waitForBlocking(sa)) {
+            return new AiAbilityDecision(0, AiPlayDecision.WaitForCombat);
+        }
+
         final TargetRestrictions tgt = sa.getTargetRestrictions();
         if (tgt != null) {
             sa.resetTargets();
