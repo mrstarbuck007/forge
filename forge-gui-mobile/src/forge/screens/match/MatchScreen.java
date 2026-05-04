@@ -492,8 +492,11 @@ public class MatchScreen extends FScreen {
                 VPlayerPanel playerPanel = getPlayerPanel(p);
                 if (playerPanel != null && playerPanelsList.contains(playerPanel)) {
                     playerViewSet.add(p);
-                    if (p.getBattlefield() != null) {
-                        for (CardView c : p.getBattlefield()) {
+                    FCollectionView<CardView> battlefield = p.getBattlefield();
+                    if (battlefield != null) {
+                        Iterable<CardView> bfIter = MatchController.instance.isNetGame()
+                                ? battlefield.threadSafeIterable() : battlefield;
+                        for (CardView c : bfIter) {
                             CardAreaPanel panel = CardAreaPanel.get(c);
                             Vector2 origin = panel.getTargetingArrowOrigin();
                             //outside left bounds
@@ -642,13 +645,11 @@ public class MatchScreen extends FScreen {
                     return true;
                 }
                 return getActivePrompt().getBtnCancel().trigger(); //trigger Cancel if can't trigger OK
-            case Keys.ESCAPE:
-                if (!FModel.getPreferences().getPrefBoolean(FPref.UI_ALLOW_ESC_TO_END_TURN) && !Forge.hasGamepad()) {//bypass check
-                    if (getActivePrompt().getBtnCancel().getText().equals(Forge.getLocalizer().getMessage("lblEndTurn"))) {
-                        return false;
-                    }
-                }
-                return getActivePrompt().getBtnCancel().trigger(); //otherwise trigger Cancel
+            case Keys.ESCAPE: {
+                boolean cancelEligible = FModel.getPreferences().getPrefBoolean(FPref.UI_ALLOW_ESC_TO_END_TURN) || Forge.hasGamepad()
+                        || !getActivePrompt().getBtnCancel().getText().equals(Forge.getLocalizer().getMessage("lblEndTurn"));
+                return cancelEligible && getActivePrompt().getBtnCancel().trigger();
+            }
             case Keys.BACK:
                 return true; //suppress Back button so it's not bumped when trying to press OK or Cancel buttons
             case Keys.A: //alpha strike on Ctrl+A on Android, A when running on desktop
