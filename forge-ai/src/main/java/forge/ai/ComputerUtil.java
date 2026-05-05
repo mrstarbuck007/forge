@@ -557,6 +557,23 @@ public class ComputerUtil {
         // don't sacrifice the card we're pumping
         typeList = ComputerUtilCost.paymentChoicesWithoutTargets(typeList, ability, ai);
 
+        // don't sacrifice the source if the ability's effect benefits the source itself (e.g., Defined$ Self)
+        if (typeList.contains(source)) {
+            boolean sourceIsBeneficiary = false;
+            SpellAbility checkSa = ability;
+            while (checkSa != null) {
+                if (checkSa.hasParam("Defined")
+                        && AbilityUtils.getDefinedCards(source, checkSa.getParam("Defined"), checkSa).contains(source)) {
+                    sourceIsBeneficiary = true;
+                    break;
+                }
+                checkSa = checkSa.getSubAbility();
+            }
+            if (sourceIsBeneficiary) {
+                typeList.remove(source);
+            }
+        }
+
         // if the source has "Casualty", don't sacrifice cards that may have granted the effect
         // TODO: is there a surefire way to determine which card added Casualty?
         if (source.hasKeyword(Keyword.CASUALTY)) {
