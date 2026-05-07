@@ -209,7 +209,23 @@ public class AiBlockController {
                 // 2.Blockers that won't get destroyed
                 } else if (!StaticAbilityAssignCombatDamageAsUnblocked.assignCombatDamageAsUnblocked(attacker)
                     && !ComputerUtilCombat.attackerHasThreateningAfflict(attacker, ai)) {
-                    blocker = ComputerUtilCard.getWorstCreatureAI(safeBlockers);
+                    // Prefer blockers with no killing opportunity against other attackers,
+                    // so potential killers are preserved for better assignments later.
+                    List<Card> noKillElsewhere = new ArrayList<>();
+                    for (Card candidate : safeBlockers) {
+                        boolean canKillOther = false;
+                        for (Card other : attackersLeft) {
+                            if (!other.equals(attacker)
+                                    && ComputerUtilCombat.canDestroyAttacker(ai, other, candidate, combat, false)) {
+                                canKillOther = true;
+                                break;
+                            }
+                        }
+                        if (!canKillOther) {
+                            noKillElsewhere.add(candidate);
+                        }
+                    }
+                    blocker = ComputerUtilCard.getWorstCreatureAI(noKillElsewhere.isEmpty() ? safeBlockers : noKillElsewhere);
                     // check whether it's better to block a creature without trample to absorb more damage
                     if (attacker.hasKeyword(Keyword.TRAMPLE)) {
                         boolean doNotBlock = false;
