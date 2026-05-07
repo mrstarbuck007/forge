@@ -114,9 +114,12 @@ public class DamagePreventAi extends SpellAbilityAi {
                 }
                 final CardCollection combatants = CardLists.filter(targetables, CardPredicates.CREATURES);
                 ComputerUtilCard.sortByEvaluateCreature(combatants);
+                final int preventAmount = AbilityUtils.calculateAmount(hostCard, sa.getParam("Amount"), sa);
 
                 for (final Card c : combatants) {
-                    if (ComputerUtilCombat.combatantWouldBeDestroyed(ai, c, combat) && sa.canAddMoreTarget()) {
+                    if (ComputerUtilCombat.combatantWouldBeDestroyed(ai, c, combat)
+                            && wouldSaveCombatant(c, preventAmount, combat)
+                            && sa.canAddMoreTarget()) {
                     	tcs.add(c);
                         chance = true;
                     }
@@ -185,8 +188,10 @@ public class DamagePreventAi extends SpellAbilityAi {
             ComputerUtilCard.sortByEvaluateCreature(combatants);
             if (game.getPhaseHandler().is(PhaseType.COMBAT_DECLARE_BLOCKERS)) {
                 Combat combat = game.getCombat();
+                final int preventAmount = AbilityUtils.calculateAmount(sa.getHostCard(), sa.getParam("Amount"), sa);
                 for (final Card c : combatants) {
-                    if (ComputerUtilCombat.combatantWouldBeDestroyed(ai, c, combat)) {
+                    if (ComputerUtilCombat.combatantWouldBeDestroyed(ai, c, combat)
+                            && wouldSaveCombatant(c, preventAmount, combat)) {
                         target = c;
                         break;
                     }
@@ -203,6 +208,22 @@ public class DamagePreventAi extends SpellAbilityAi {
             sa.addDividedAllocation(target, AbilityUtils.calculateAmount(sa.getHostCard(), sa.getParam("Amount"), sa));
         }
         return true;
+    }
+
+    // Returns true only if preventing preventAmount damage actually saves combatant c from lethal combat damage.
+    private static boolean wouldSaveCombatant(final Card c, final int preventAmount, final Combat combat) {
+        int incomingDamage;
+        if (combat.isAttacking(c)) {
+            incomingDamage = ComputerUtilCombat.totalDamageOfBlockers(c, combat.getBlockers(c));
+        } else if (combat.isBlocking(c)) {
+            incomingDamage = 0;
+            for (final Card attacker : combat.getAttackersBlockedBy(c)) {
+                incomingDamage += attacker.getNetCombatDamage();
+            }
+        } else {
+            return false;
+        }
+        return (incomingDamage - preventAmount) < ComputerUtilCombat.getDamageToKill(c, false);
     }
 
 }
