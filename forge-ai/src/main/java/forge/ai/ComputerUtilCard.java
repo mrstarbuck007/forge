@@ -922,6 +922,41 @@ public class ComputerUtilCard {
         return false;
     }
 
+    public static boolean canBeKilledByOpponentActivatedDamage(final Player ai, final Card attacker) {
+        if (attacker.hasKeyword(Keyword.INDESTRUCTIBLE)) {
+            return false;
+        }
+        final int damageToKill = attacker.getNetToughness() - attacker.getDamage();
+        if (damageToKill <= 0) {
+            return false;
+        }
+        int totalAvailableDamage = 0;
+        for (Player opp : ai.getOpponents()) {
+            for (Card c : opp.getCardsIn(ZoneType.Battlefield)) {
+                for (SpellAbility sa : c.getSpellAbilities()) {
+                    if (!sa.isActivatedAbility() || sa.getApi() != ApiType.DealDamage) {
+                        continue;
+                    }
+                    final String validTgts = sa.getParam("ValidTgts");
+                    if (validTgts == null || !validTgts.contains("attacking")) {
+                        continue;
+                    }
+                    if (attacker.hasKeyword(Keyword.HEXPROOF)) {
+                        continue;
+                    }
+                    if (!ComputerUtilCost.canPayCost(sa, opp, false)) {
+                        continue;
+                    }
+                    totalAvailableDamage += AbilityUtils.calculateAmount(c, sa.getParamOrDefault("NumDmg", "0"), sa);
+                    if (totalAvailableDamage >= damageToKill) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * getMostExpensivePermanentAI.
      *

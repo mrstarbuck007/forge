@@ -1434,7 +1434,8 @@ public class AiAttackController {
             }
 
             // performance-wise it doesn't seem worth it to check attackVigilance() instead (only includes a single niche card)
-            if (!attacker.hasKeyword(Keyword.VIGILANCE) && ComputerUtilCard.canBeKilledByRoyalAssassin(ai, attacker)) {
+            if ((!attacker.hasKeyword(Keyword.VIGILANCE) && ComputerUtilCard.canBeKilledByRoyalAssassin(ai, attacker))
+                    || ComputerUtilCard.canBeKilledByOpponentActivatedDamage(ai, attacker)) {
                 canKillAllDangerous = false;
                 canBeKilled = true;
                 canBeKilledByOne = true;
