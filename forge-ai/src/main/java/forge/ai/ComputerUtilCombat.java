@@ -1926,6 +1926,18 @@ public class ComputerUtilCombat {
         // Damage prevention might come from a static effect
         if (isCombatDamagePrevented(attacker, blocker, attackerDamage)) {
             attackerDamage = 0;
+        } else if (attackerDamage > 0 && !withoutAbilities) {
+            // isCombatDamagePrevented() checks game.getCombat() for blocking relationships,
+            // which is not set during pre-combat simulation. Directly check for prevention
+            // effects conditioned on the blocking relationship (e.g., Wall of Shadows).
+            for (ReplacementEffect re : blocker.getReplacementEffects()) {
+                Map<String, String> params = re.getMapParams();
+                if (params.containsKey("Prevent")
+                        && "Creature.blockedBySource".equals(params.get("ValidSource"))) {
+                    attackerDamage = 0;
+                    break;
+                }
+            }
         }
         if (isCombatDamagePrevented(blocker, attacker, defenderDamage)) {
             defenderDamage = 0;

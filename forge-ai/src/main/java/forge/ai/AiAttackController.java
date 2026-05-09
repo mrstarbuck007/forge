@@ -1520,7 +1520,7 @@ public class AiAttackController {
                 return true;
             case 4: // expecting to at least trade with something, or can attack "for free", expecting no counterattack
                 if (saf.canKillAll || (saf.dangerousBlockersPresent && saf.canKillAllDangerous && !saf.canBeKilledByOne) || !saf.canBeBlocked()
-                        || saf.defPower == 0) {
+                        || (saf.defPower == 0 && saf.canKillAll)) {
                     if (LOG_AI_ATTACKS)
                         System.out.println(attacker.getName() + " = attacking expecting to at least trade with something");
                     return true;
