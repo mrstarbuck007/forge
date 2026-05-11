@@ -232,6 +232,7 @@ public class ManaAi extends SpellAbilityAi {
         CardCollection castableSpells = CardLists.filter(cardList,
                 Arrays.asList(
                         CardPredicates.restriction(restrictValid.split(","), ai, host, sa),
+                        CardPredicates.greaterCMC(numManaSrcs + 1), // only worthwhile if ritual enables a spell unaffordable without it
                         CardPredicates.lessCMC(searchCMC),
                         CardPredicates.isColorless().or(CardPredicates.isColor(producedColor))));
 
