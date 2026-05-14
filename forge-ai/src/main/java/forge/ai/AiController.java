@@ -407,6 +407,31 @@ public class AiController {
         return spellAbility;
     }
 
+    private boolean hasSelfSacrificeOnLandPlayedTrigger(Card land) {
+        boolean hasSelfSacOnLandPlayed = false;
+        for (Trigger t : land.getTriggers()) {
+            Map<String, String> params = t.getMapParams();
+            String mode = params.get("Mode");
+
+            if ("LandPlayed".equals(mode)) {
+                SpellAbility trigSA = t.ensureAbility();
+                if (trigSA != null && ApiType.Sacrifice.equals(trigSA.getApi())
+                        && trigSA.getParamOrDefault("SacValid", "Self").equals("Self")) {
+                    hasSelfSacOnLandPlayed = true;
+                }
+            }
+
+            // If the land has a triggered benefit when it leaves the battlefield,
+            // don't suppress the play — the sacrifice may be intentional and worthwhile.
+            if ("ChangesZone".equals(mode)
+                    && "Battlefield".equals(params.get("Origin"))
+                    && params.containsKey("Execute")) {
+                return false;
+            }
+        }
+        return hasSelfSacOnLandPlayed;
+    }
+
     private CardCollection filterLandsToPlay(CardCollection landList) {
         final CardCollectionView hand = player.getCardsIn(ZoneType.Hand);
         CardCollection nonLandList = CardLists.filter(hand, CardPredicates.NON_LANDS);
@@ -444,6 +469,16 @@ public class AiController {
                 if (battlefield.anyMatch(CardPredicates.nameEquals(name))) {
                     return false;
                 }
+            }
+
+            // Don't play a land whose name matches a land already in play that will
+            // sacrifice itself when another land is played (e.g., City of Traitors into
+            // City of Traitors). The result is one land for one land — the drop is wasted.
+            // Exception: if the in-play land has a death trigger it may be worth sacrificing.
+            if (battlefield.stream()
+                    .filter(l -> l.isLand() && l.getName().equals(name))
+                    .anyMatch(this::hasSelfSacrificeOnLandPlayedTrigger)) {
+                return false;
             }
 
             final CardCollectionView hand1 = player.getCardsIn(ZoneType.Hand);
