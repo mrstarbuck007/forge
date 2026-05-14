@@ -894,6 +894,9 @@ public class ComputerUtilCard {
     }
 
     public static boolean canBeKilledByRoyalAssassin(final Player ai, final Card card) {
+        if (card.hasKeyword(Keyword.INDESTRUCTIBLE)) {
+            return false;
+        }
         boolean wasTapped = card.isTapped();
         for (Player opp : ai.getOpponents()) {
             for (Card c : opp.getCardsIn(ZoneType.Battlefield)) {

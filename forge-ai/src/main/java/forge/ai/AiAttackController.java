@@ -1351,6 +1351,7 @@ public class AiAttackController {
         boolean hasCombatEffect = false;
         boolean dangerousBlockersPresent = false;
         boolean canTrampleOverDefenders = false;
+        boolean canBeKilledByActivatedAbility = false; // killed by activated ability (e.g. Royal Assassin), not by a blocker
         int numberOfPossibleBlockers = 0;
         int defPower = 0;
 
@@ -1436,11 +1437,13 @@ public class AiAttackController {
             // performance-wise it doesn't seem worth it to check attackVigilance() instead (only includes a single niche card)
             if ((!attacker.hasKeyword(Keyword.VIGILANCE) && ComputerUtilCard.canBeKilledByRoyalAssassin(ai, attacker))
                     || ComputerUtilCard.canBeKilledByOpponentActivatedDamage(ai, attacker)) {
+                canKillAll = false;
                 canKillAllDangerous = false;
                 canBeKilled = true;
                 canBeKilledByOne = true;
                 isWorthLessThanAllKillers = false;
                 hasCombatEffect = false;
+                canBeKilledByActivatedAbility = true;
             } else if ((canKillAllDangerous || !canBeKilled) && ComputerUtilCard.canBeBlockedProfitably(defendingOpponent, attacker, true)) {
                 canKillAllDangerous = false;
                 canBeKilled = true;
@@ -1488,8 +1491,14 @@ public class AiAttackController {
         }
 
         SpellAbilityFactors saf = new SpellAbilityFactors(attacker);
-        if (aiAggression != 5) {
-            saf.calculate(defenders, combat);
+        saf.calculate(defenders, combat);
+
+        // Creature will be destroyed by an activated ability (e.g. Royal Assassin) before dealing
+        // combat damage. Only allow if it has a "when attacks" trigger worth sacrificing it for.
+        if (saf.canBeKilledByActivatedAbility && !saf.hasAttackEffect) {
+            if (LOG_AI_ATTACKS)
+                System.out.println(attacker.getName() + " = skipping attack, would be destroyed by opponent's activated ability with no gain");
+            return false;
         }
 
         // if the creature cannot block and can kill all opponents they might as
