@@ -9,7 +9,6 @@ import forge.game.CardTraitPredicates;
 import forge.game.ability.AbilityUtils;
 import forge.game.card.*;
 import forge.game.cost.CostRemoveCounter;
-import forge.game.keyword.Keyword;
 import forge.game.mana.Mana;
 import forge.game.mana.ManaPool;
 import forge.game.phase.PhaseHandler;
@@ -212,10 +211,12 @@ public class ManaAi extends SpellAbilityAi {
             }
             testSaNoCost.setActivatingPlayer(ai);
             if (((PlayerControllerAi)ai.getController()).getAi().canPlaySa(testSaNoCost) == AiPlayDecision.WillPlay) {
-                if (testSa.getHostCard().isPermanent() && !testSa.getHostCard().hasKeyword(Keyword.HASTE)
-                    && !ai.getGame().getPhaseHandler().is(PhaseType.MAIN2)) {
-                    // AI will waste a ritual in Main 1 unless the casted permanent is a haste creature
-                    continue;
+                if (testSa.getHostCard().isPermanent() && !ai.getGame().getPhaseHandler().is(PhaseType.MAIN2)) {
+                    // Mirror PermanentAi.checkPhaseRestrictions: only use this permanent as a ritual
+                    // target in MAIN1 if castPermanentInMain1 agrees the spell would actually be cast.
+                    if (!ComputerUtil.castPermanentInMain1(ai, testSa)) {
+                        continue;
+                    }
                 }
                 if (testSa.getHostCard().isInstant()) {
                     // AI is bad at choosing which instants are worth a Ritual
