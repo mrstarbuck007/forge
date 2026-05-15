@@ -1710,6 +1710,11 @@ public class ComputerUtilCombat {
         }
         attackerDamage = predictDamageTo(blocker, attackerDamage, possibleDefenderPrevention, attacker, true);
 
+        // Damage prevention from a static effect (e.g., protection from the attacker's color)
+        if (isCombatDamagePrevented(attacker, blocker, attackerDamage)) {
+            attackerDamage = 0;
+        }
+
         final int defenderLife = getDamageToKill(blocker, false)
                 + predictToughnessBonusOfBlocker(attacker, blocker, withoutAbilities);
         final int attackerLife = getDamageToKill(attacker, false)

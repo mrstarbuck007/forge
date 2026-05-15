@@ -1351,6 +1351,7 @@ public class AiAttackController {
         boolean hasCombatEffect = false;
         boolean dangerousBlockersPresent = false;
         boolean canTrampleOverDefenders = false;
+        boolean allDamagePrevented = false; // all valid blockers would prevent this attacker's damage with no block-independent gain
         boolean canBeKilledByActivatedAbility = false; // killed by activated ability (e.g. Royal Assassin), not by a blocker
         int numberOfPossibleBlockers = 0;
         int defPower = 0;
@@ -1434,6 +1435,24 @@ public class AiAttackController {
                 }
             }
 
+            // If all valid blockers would prevent this attacker's combat damage and the attacker has
+            // no block-independent benefit, the attack deals nothing. Trample damage to the player
+            // still gets through (bypassing protection on the blocker), so exclude that case.
+            if (!validBlockers.isEmpty()) {
+                boolean hasBlockIndependentEffect = hasAttackEffect
+                        || attacker.hasKeyword(Keyword.AFFLICT)
+                        || "Blocked".equals(attacker.getSVar("HasAttackEffect"))
+                        || "TRUE".equals(attacker.getSVar("HasCombatEffect"));
+                if (!hasBlockIndependentEffect && !canTrampleOverDefenders) {
+                    allDamagePrevented = validBlockers.stream().allMatch(b ->
+                            ComputerUtilCombat.isCombatDamagePrevented(attacker, b, attacker.getNetCombatDamage()));
+                    if (allDamagePrevented) {
+                        canKillAll = false;
+                        canKillAllDangerous = false;
+                    }
+                }
+            }
+
             // performance-wise it doesn't seem worth it to check attackVigilance() instead (only includes a single niche card)
             if ((!attacker.hasKeyword(Keyword.VIGILANCE) && ComputerUtilCard.canBeKilledByRoyalAssassin(ai, attacker))
                     || ComputerUtilCard.canBeKilledByOpponentActivatedDamage(ai, attacker)) {
@@ -1512,6 +1531,14 @@ public class AiAttackController {
             if (LOG_AI_ATTACKS)
                 System.out.println(attacker.getName() + " = expecting to survive and get some Trample damage through");
             return true;
+        }
+
+        // Don't attack if all valid blockers prevent our combat damage and we have no block-independent
+        // gain (e.g. Afflict, Trample). Applies even in all-out attack mode (aiAggression = 5).
+        if (saf.allDamagePrevented) {
+            if (LOG_AI_ATTACKS)
+                System.out.println(attacker.getName() + " = skipping attack, all valid blockers prevent combat damage");
+            return false;
         }
 
         // decide if the creature should attack based on the prevailing strategy choice in aiAggression
