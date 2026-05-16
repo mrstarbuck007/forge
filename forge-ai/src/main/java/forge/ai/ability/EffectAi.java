@@ -336,6 +336,18 @@ public class EffectAi extends SpellAbilityAi {
                         if (!CombatUtil.canBeBlocked(card, ai.getOpponents().getCreaturesInPlay(), phase.getCombat())) {
                             continue;
                         }
+                        // Don't activate if the remaining mana after paying the ability cost won't cover the combat attack tax (e.g. Propaganda)
+                        final Cost attackTax = CombatUtil.getAttackCost(ai.getGame(), card, ai.getWeakestOpponent());
+                        if (attackTax != null) {
+                            final int attackTaxCmc = attackTax.getCostMana().getMana().getCMC();
+                            if (attackTaxCmc > 0) {
+                                final int abilityCmc = sa.getPayCosts().getTotalMana().getCMC();
+                                final int availableMana = ComputerUtilMana.getAvailableManaEstimate(ai, false);
+                                if (availableMana < abilityCmc + attackTaxCmc) {
+                                    continue;
+                                }
+                            }
+                        }
                         if (card.getNetPower() >= ai.getWeakestOpponent().getLife() && ai.getWeakestOpponent().canLoseLife() && !ai.getWeakestOpponent().cantLoseForZeroOrLessLife()) {
                             // try to finish off the opponent with an unblockable creature
                             sa.getTargets().add(card);
