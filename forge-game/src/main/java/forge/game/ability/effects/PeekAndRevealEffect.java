@@ -69,6 +69,7 @@ public class PeekAndRevealEffect extends SpellAbilityEffect {
             for (int i = 0; i < numPeek; i++) {
                 peekCards.add(playerZone.get(i));
             }
+            zoneToPeek.updateTopLibraryPeekedThisTurn(numPeek);
 
             Map<String, Object> params = new HashMap<>();
             params.put("Revealed", peekCards);

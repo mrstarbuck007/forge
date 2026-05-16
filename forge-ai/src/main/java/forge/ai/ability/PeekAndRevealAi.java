@@ -1,6 +1,7 @@
 package forge.ai.ability;
 
 import forge.ai.*;
+import forge.game.ability.AbilityUtils;
 import forge.game.card.Card;
 import forge.game.card.CardCollection;
 import forge.game.phase.PhaseType;
@@ -45,6 +46,13 @@ public class PeekAndRevealAi extends SpellAbilityAi {
         }
 
         if (libraryOwner.getCardsIn(ZoneType.Library).isEmpty()) {
+            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+        }
+
+        int peekAmount = AbilityUtils.calculateAmount(sa.getHostCard(),
+                sa.getParamOrDefault("PeekAmount", "1"), sa);
+        if (libraryOwner.getTopLibraryPeekedThisTurn() >= peekAmount
+                && libraryOwner.getNumDrawnThisTurnAtLastLibraryPeek() == libraryOwner.getNumDrawnThisTurn()) {
             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
         }
 

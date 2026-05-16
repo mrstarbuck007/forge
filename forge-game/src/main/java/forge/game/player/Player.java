@@ -93,6 +93,8 @@ public class Player extends GameEntity implements Comparable<Player> {
     private int numDrawnThisTurn;
     private int numDrawnLastTurn;
     private int numDrawnThisDrawStep;
+    private int topLibraryPeekedThisTurn = 0;
+    private int numDrawnThisTurnAtLastLibraryPeek = -1;
     private int numCardsInHandStartedThisTurnWith;
     private int numExploredThisTurn;
     private int numTokenCreatedThisTurn;
@@ -1281,6 +1283,19 @@ public class Player extends GameEntity implements Comparable<Player> {
     }
     public final int numDrawnThisDrawStep() {
         return numDrawnThisDrawStep;
+    }
+
+    public int getTopLibraryPeekedThisTurn() { return topLibraryPeekedThisTurn; }
+    public int getNumDrawnThisTurnAtLastLibraryPeek() { return numDrawnThisTurnAtLastLibraryPeek; }
+
+    public void updateTopLibraryPeekedThisTurn(int n) {
+        topLibraryPeekedThisTurn = Math.max(topLibraryPeekedThisTurn, n);
+        numDrawnThisTurnAtLastLibraryPeek = numDrawnThisTurn;
+    }
+
+    public void resetTopLibraryPeekedThisTurn() {
+        topLibraryPeekedThisTurn = 0;
+        numDrawnThisTurnAtLastLibraryPeek = -1;
     }
 
     /**
@@ -2493,6 +2508,7 @@ public class Player extends GameEntity implements Comparable<Player> {
         resetDiscardedThisTurn();
         resetSacrificedThisTurn();
         resetVenturedThisTurn();
+        resetTopLibraryPeekedThisTurn();
         setDescended(0);
         setSpellsCastLastTurn(getSpellsCastThisTurn());
         resetSpellsCastThisTurn();
