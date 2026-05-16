@@ -374,6 +374,13 @@ public class CardDetailUtil {
         }
 
         if (state.isCreature()) {
+            if (card.isAttacking()) {
+                area.append("\n");
+                area.append("*** Attacking ***");
+            } else if (card.isBlocking()) {
+                area.append("\n");
+                area.append("*** Blocking ***");
+            }
             final int damage = card.getDamage();
             if (damage > 0) {
                 area.append("\n");

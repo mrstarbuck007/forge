@@ -49,8 +49,8 @@ public enum TrackableProperty {
     RevealedCardsCollection(TrackableTypes.CardViewCollectionType, FreezeMode.IgnoresFreeze),
     PaperCardBackup(TrackableTypes.IPaperCardType),
 
-    Attacking(TrackableTypes.BooleanType),
-    Blocking(TrackableTypes.BooleanType),
+    Attacking(TrackableTypes.BooleanType, FreezeMode.IgnoresFreeze),
+    Blocking(TrackableTypes.BooleanType, FreezeMode.IgnoresFreeze),
     PhasedOut(TrackableTypes.BooleanType),
     Sickness(TrackableTypes.BooleanType),
     Tapped(TrackableTypes.BooleanType),
