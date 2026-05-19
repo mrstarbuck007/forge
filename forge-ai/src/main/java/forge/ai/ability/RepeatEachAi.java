@@ -9,6 +9,7 @@ import forge.game.spellability.SpellAbility;
 import forge.game.zone.ZoneType;
 import forge.util.TextUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -99,6 +100,22 @@ public class RepeatEachAi extends SpellAbilityAi {
         }
 
         // TODO Add some normal AI variability here
+
+        if (sa.hasParam("RepeatCards")) {
+            final Card source = sa.getHostCard();
+            final List<ZoneType> zone = new ArrayList<>();
+            if (sa.hasParam("Zone")) {
+                zone.addAll(ZoneType.listValueOf(sa.getParam("Zone")));
+            } else {
+                zone.add(ZoneType.Battlefield);
+            }
+            final CardCollectionView repeatCards = CardLists.getValidCards(
+                    aiPlayer.getGame().getCardsIn(zone), sa.getParam("RepeatCards"),
+                    source.getController(), source, sa);
+            if (repeatCards.isEmpty()) {
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+            }
+        }
 
         return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
     }
