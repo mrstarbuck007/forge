@@ -10,6 +10,7 @@ import javax.swing.event.MenuListener;
 
 import forge.control.KeyboardShortcuts;
 import forge.gamemodes.match.YieldController;
+import forge.gamemodes.match.YieldUpdate;
 import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
@@ -45,6 +46,8 @@ public final class GameMenu {
         menu.add(getMenuItem_YieldSettings());
         final SkinnedCheckBoxMenuItem autoPassItem = getMenuItem_AutoPass();
         menu.add(autoPassItem);
+        menu.add(getMenuItem_ClearRememberedAbilityOrders());
+        menu.addSeparator();
         menu.addMenuListener(new MenuListener() {
             @Override public void menuSelected(final MenuEvent e) {
                 autoPassItem.setState(prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS));
@@ -53,6 +56,13 @@ public final class GameMenu {
             @Override public void menuCanceled(final MenuEvent e) {}
         });
         return menu;
+    }
+
+    private SkinnedMenuItem getMenuItem_ClearRememberedAbilityOrders() {
+        final Localizer localizer = Localizer.getInstance();
+        final SkinnedMenuItem menuItem = new SkinnedMenuItem(localizer.getMessage("lblResetSavedAbilityOrders"));
+        menuItem.addActionListener(e -> matchUI.getGameController().sendYieldUpdate(new YieldUpdate.ClearAbilityOrders()));
+        return menuItem;
     }
 
     private SkinnedMenuItem getMenuItem_Undo() {
@@ -114,7 +124,7 @@ public final class GameMenu {
         menuItem.setState(prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS));
         menuItem.addActionListener(e -> {
             YieldController.toggleAutoPassNoActions(matchUI.getGameController());
-            matchUI.getCDock().refresh();
+            matchUI.getCDock().update();
             menuItem.setState(prefs.getPrefBoolean(FPref.YIELD_AUTO_PASS_NO_ACTIONS));
         });
         return menuItem;

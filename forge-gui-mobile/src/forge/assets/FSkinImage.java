@@ -80,18 +80,16 @@ public enum FSkinImage implements FSkinImageInterface {
     TICKET          (FSkinProp.IMG_TICKET),
     RAD             (FSkinProp.IMG_RAD),
 
-    //Dock Icons
+    //menu Icons
     SHORTCUTS    (FSkinProp.ICO_SHORTCUTS),
     SETTINGS     (FSkinProp.ICO_SETTINGS),
     ENDTURN      (FSkinProp.ICO_ENDTURN),
     CONCEDE      (FSkinProp.ICO_CONCEDE),
-    REVERTLAYOUT (FSkinProp.ICO_REVERTLAYOUT),
-    OPENLAYOUT   (FSkinProp.ICO_OPENLAYOUT),
-    SAVELAYOUT   (FSkinProp.ICO_SAVELAYOUT),
     DECKLIST     (FSkinProp.ICO_DECKLIST),
     ALPHASTRIKE  (FSkinProp.ICO_ALPHASTRIKE),
     ARCSOFF      (FSkinProp.ICO_ARCSOFF),
     ARCSON       (FSkinProp.ICO_ARCSON),
+    ARCSHOVER    (FSkinProp.ICO_ARCSHOVER),
 
     //choice-search-misc
     HDCHOICE     (FSkinProp.ICO_HDCHOICE),
