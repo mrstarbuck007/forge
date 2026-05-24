@@ -17,6 +17,8 @@ import forge.game.spellability.SpellAbility;
 import forge.game.zone.ZoneType;
 import forge.util.collect.FCollectionView;
 
+import java.util.List;
+
 public class TapAi extends TapAiBase {
 
     @Override
@@ -130,6 +132,14 @@ public class TapAi extends TapAiBase {
                 return true;
             }
         }
+        // Don't pay to prevent tapping if all defined targets are already tapped — the effect is a no-op
+        if (!sa.usesTargeting() && sa.hasParam("Defined")) {
+            final List<Card> defined = AbilityUtils.getDefinedCards(sa.getHostCard(), sa.getParam("Defined"), sa);
+            if (!defined.isEmpty() && defined.stream().allMatch(Card::isTapped)) {
+                return false;
+            }
+        }
+
         return super.willPayUnlessCost(payer, sa, cost, alreadyPaid, payers);
     }
 }
