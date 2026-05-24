@@ -107,9 +107,8 @@ public class EffectAi extends SpellAbilityAi {
 
                 if (currentAttackers.size() > possibleBlockers.size()) {
                     return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
-                } else {
-                    return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
+                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
             } else if (logic.equals("Fog")) {
                 FogAi fogAi = new FogAi();
                 if (!fogAi.canPlay(ai, sa).willingToPlay()) {
@@ -550,13 +549,9 @@ public class EffectAi extends SpellAbilityAi {
                     return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
                 }
 
-                List<Card> oppCreatures = CardLists.filterAsList(list, c -> {
-                    return c.isCreature() && c.getController().isOpponentOf(ai);
-                });
+                List<Card> oppCreatures = CardLists.filterAsList(list, c -> c.isCreature() && c.getController().isOpponentOf(ai));
 
-                List<Card> oppWithAbilities = CardLists.filterAsList(list, c -> {
-                    return !c.isCreature() && c.getController().isOpponentOf(ai) && c.getSpellAbilities().anyMatch(SpellAbility::isActivatedAbility);
-                });
+                List<Card> oppWithAbilities = CardLists.filterAsList(list, c -> !c.isCreature() && c.getController().isOpponentOf(ai) && c.getSpellAbilities().anyMatch(SpellAbility::isActivatedAbility));
 
                 if (cantAttack || cantBlock) {
                     if (oppCreatures.isEmpty()) {
@@ -597,12 +592,11 @@ public class EffectAi extends SpellAbilityAi {
                         if (!sa.isMinTargetChosen() || sa.isZeroTargets()) {
                             sa.resetTargets();
                             return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
-                        } else {
-                            if (!ComputerUtil.shouldCastLessThanMax(ai, sa.getHostCard())) {
-                                return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
-                            }
-                            break;
                         }
+                        if (!ComputerUtil.shouldCastLessThanMax(ai, sa.getHostCard())) {
+                            return new AiAbilityDecision(0, AiPlayDecision.CantPlayAi);
+                        }
+                        break;
                     }
 
                     list.remove(choice);
