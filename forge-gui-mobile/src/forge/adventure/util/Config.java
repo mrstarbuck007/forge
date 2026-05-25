@@ -124,8 +124,10 @@ public class Config {
     }
 
     private String resPath() {
-
-        return GuiBase.isAndroid() ? ForgeConstants.ASSETS_DIR : Files.exists(Paths.get("./res")) ? "./" : Files.exists(Paths.get("./forge-gui/")) ? "./forge-gui/" : "../forge-gui";
+        if (GuiBase.isAndroid()) return ForgeConstants.ASSETS_DIR;
+        if (Files.exists(Paths.get("./res/adventure"))) return ".";
+        if (Files.exists(Paths.get("./forge-gui/res/adventure"))) return "./forge-gui";
+        return "../forge-gui";
     }
 
     public String getPlanePath(String plane) {

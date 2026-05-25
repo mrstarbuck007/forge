@@ -51,7 +51,8 @@ public class GuiBase {
                     : "\nCPU: " + hwInfo.device().getCpuDescription());
             sb.append("\nRAM: ").append(hwInfo.getTotalRam()).append(" MB");
             sb.append("\nOS: ").append(hwInfo.os().getRawDescription());
-        } else {
+            sb.append("\n##########################################");
+        }
             sb.append("\nJava: ").append(System.getProperty("java.version"))
                     .append(" (").append(System.getProperty("java.vendor")).append(")");
             sb.append("\nOS: ").append(System.getProperty("os.name"))
@@ -59,7 +60,6 @@ public class GuiBase {
                     .append(" ").append(System.getProperty("os.arch"));
             sb.append("\nRAM: ").append(runtime.maxMemory() / 1024 / 1024)
                     .append(" MB max, ").append(runtime.availableProcessors()).append(" CPUs");
-        }
         sb.append("\n##########################################");
         return sb.toString();
     }

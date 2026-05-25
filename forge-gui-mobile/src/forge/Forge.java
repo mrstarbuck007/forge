@@ -244,7 +244,7 @@ public class Forge implements ApplicationListener {
 
         if (autoCache) {
             //increase cacheSize for devices with RAM more than 5GB, default is 300. Some phones have more than 10GB RAM (Mi 10, OnePlus 8, S20, etc..)
-            if (totalDeviceRAM > 5000) //devices with more than 10GB RAM will have 600 Cache size, 400 Cache size for morethan 5GB RAM
+            if ((Runtime.getRuntime().maxMemory() / 1024 / 1024) > 5000) //JVM runtimes with more than 10GB RAM will have 600 Cache size, 400 Cache size for morethan 5GB RAM
                 cacheSize = totalDeviceRAM > 10000 ? 600 : 400;
         }
         if (!initialized) {
@@ -392,10 +392,8 @@ public class Forge implements ApplicationListener {
         }
     }
     protected void afterDbLoaded() {
-        if (GuiBase.isAndroid() && autoCache)
-            getSplashScreen().getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup") + "\nDetected RAM: " + totalDeviceRAM + "MB. Cache size: " + cacheSize);
-        else
-            getSplashScreen().getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup"));
+        getSplashScreen().getProgressBar().setDescription(getLocalizer().getMessage("lblFinishingStartup") + ", Cache size: " + cacheSize);
+
         //override transition & title bg
         try {
             FileHandle transitionFile = Config.instance().getFile("ui/transition.png");
