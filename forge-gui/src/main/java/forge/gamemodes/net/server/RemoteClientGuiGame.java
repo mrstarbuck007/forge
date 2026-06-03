@@ -13,6 +13,7 @@ import forge.game.player.IHasIcon;
 import forge.game.player.PlayerView;
 import forge.game.spellability.SpellAbilityView;
 import forge.game.zone.ZoneType;
+import forge.gamemodes.match.DrawOfferMessage;
 import forge.gamemodes.match.YieldUpdate;
 import forge.gamemodes.net.NetworkGuiGame;
 import forge.gamemodes.net.DeltaPacket;
@@ -338,6 +339,11 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
     }
 
     @Override
+    public void updateDrawOffer(final DrawOfferMessage.Status update) {
+        send(ProtocolMethod.updateDrawOffer, update);
+    }
+
+    @Override
     public void updateButtons(final PlayerView owner, final String label1, final String label2, final boolean enable1, final boolean enable2, final boolean focus1) {
         send(ProtocolMethod.updateButtons, owner, label1, label2, enable1, enable2, focus1);
     }
@@ -496,6 +502,18 @@ public class RemoteClientGuiGame extends NetworkGuiGame implements IHasForgeLog 
     @Override
     public void clearSelectables() {
         syncAndSend(ProtocolMethod.clearSelectables);
+    }
+
+    @Override
+    public void setWeaklySelectable(final Iterable<CardView> cards) {
+        updateGameView();
+        send(ProtocolMethod.setWeaklySelectable, cards);
+    }
+
+    @Override
+    public void clearWeaklySelectable() {
+        updateGameView();
+        send(ProtocolMethod.clearWeaklySelectable);
     }
 
     @Override
