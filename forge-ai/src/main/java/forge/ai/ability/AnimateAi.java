@@ -408,6 +408,42 @@ public class AnimateAi extends SpellAbilityAi {
             }
         }
 
+        if (logic.equals("CurseSetPT")) {
+            CardCollection oppCreatures = CardLists.filter(list,
+                    c -> c.getController().isOpponentOf(ai) && c.isCreature());
+
+            Card lethalTarget = null;
+            int lethalValue = 0;
+            Card weakenTarget = null;
+            int weakenValue = 0;
+
+            for (Card c : oppCreatures) {
+                Card cursed = becomeAnimated(c, sa);
+                int netToughness = cursed.getNetToughness();
+                int origValue = ComputerUtilCard.evaluateCreature(c);
+
+                if (netToughness <= 0) {
+                    if (origValue > lethalValue) {
+                        lethalValue = origValue;
+                        lethalTarget = c;
+                    }
+                } else {
+                    if (origValue > weakenValue) {
+                        weakenValue = origValue;
+                        weakenTarget = c;
+                    }
+                }
+            }
+
+            Card chosen = lethalTarget != null ? lethalTarget : weakenTarget;
+            if (chosen != null) {
+                sa.getTargets().add(chosen);
+                rememberAnimatedThisTurn(ai, chosen);
+                return new AiAbilityDecision(100, AiPlayDecision.WillPlay);
+            }
+            return new AiAbilityDecision(0, AiPlayDecision.TargetingFailed);
+        }
+
         if (logic.equals("ValuableAttackerOrBlocker")) {
             final Combat combat = ph.getCombat();
             for (Card c : list) {
